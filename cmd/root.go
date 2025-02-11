@@ -27,13 +27,13 @@ import (
 	"go.szostok.io/version/extension"
 )
 
-var cfgFile             string
-var logLevel            string
-var services            []Microservice
-var oasbinderAddress    string
+var cfgFile string
+var logLevel string
+var services []Microservice
+var oasbinderAddress string
 var oasbinderPortNumber int
-var apiSpecsPath        string
-var headers             map[string]string
+var apiSpecsPath string
+var headers map[string]string
 
 var log = logrus.New()
 

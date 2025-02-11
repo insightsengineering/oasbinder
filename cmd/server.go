@@ -5,8 +5,9 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"strconv"
+	"strings"
+	"time"
 )
 
 // Microservice represents configuration for each microservice
@@ -42,7 +43,7 @@ func GetOASSpec(url string) ([]byte, error) {
 }
 
 // GenerateHTML generates the HTML for viewing the OpenAPI spec using Swagger UI
-func GenerateHTML(spec []byte, serviceUrl string, currentEndpoint string, message string) (string, error) {
+func GenerateHTML(spec []byte, serviceURL string, currentEndpoint string, message string) (string, error) {
 	type MicroserviceOption struct {
 		Name     string
 		Selected bool
@@ -67,7 +68,7 @@ func GenerateHTML(spec []byte, serviceUrl string, currentEndpoint string, messag
 
 	params := SwaggerUIParams{
 		Spec:             string(spec),
-		Host:             serviceUrl,
+		Host:             serviceURL,
 		OasbinderAddress: oasbinderAddress + "/",
 		Headers:          headers,
 		MicroserviceList: microserviceOptions,
@@ -95,6 +96,7 @@ func GenerateHTML(spec []byte, serviceUrl string, currentEndpoint string, messag
       <div class="form-group">
         <label for="microservice-select" class="font-weight-bold">Select Microservice:</label>
         <select id="microservice-select" class="form-control">
+          <option value=""></option>
           {{range .MicroserviceList}}
             <option value="{{.Name}}" {{if .Selected}}selected{{end}}>{{.Name}}</option>
           {{end}}
@@ -145,30 +147,30 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	log.Debug("path = ", r.URL.Path)
 	serviceName := strings.TrimPrefix(r.URL.Path, "/")
 	log.Debug("serviceName = ", serviceName)
-	microserviceUrl := ""
+	microserviceURL := ""
 	for _, service := range services {
 		if service.Name == serviceName {
-			microserviceUrl = service.URL
+			microserviceURL = service.URL
 			break
 		}
 	}
 
-	log.Debug("microserviceUrl = ", microserviceUrl)
+	log.Debug("microserviceURL = ", microserviceURL)
 
 	message := ""
 	var spec []byte
 	var err error
 
-	if microserviceUrl == "" {
+	if microserviceURL == "" {
 		message = "Please select a service from the list."
 	} else {
-		spec, err = GetOASSpec(microserviceUrl)
+		spec, err = GetOASSpec(microserviceURL)
 		if err != nil {
 			message = "Could not retrieve OpenAPI spec: " + err.Error()
 		}
 	}
 
-	html, err := GenerateHTML(spec, microserviceUrl, r.URL.Path, message)
+	html, err := GenerateHTML(spec, microserviceURL, r.URL.Path, message)
 	if err != nil {
 		http.Error(w, "Could not generate HTML", http.StatusInternalServerError)
 		log.Error(err)
@@ -182,13 +184,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func serve() {
 	log.Debug("headers = ", headers)
 
-	var err error
 	http.HandleFunc("/", handler)
 
 	addr := "0.0.0.0:" + strconv.Itoa(oasbinderPortNumber)
 	log.Info("Listening on ", addr)
-	err = http.ListenAndServe(addr, nil)
-	if err != nil {
-		log.Fatal(err)
+
+	s := &http.Server{
+		Addr:           addr,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
 	}
+	log.Fatal(s.ListenAndServe())
 }
