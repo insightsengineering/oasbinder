@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/jamiealquiza/envy"
 	"github.com/sirupsen/logrus"
@@ -26,8 +27,13 @@ import (
 	"go.szostok.io/version/extension"
 )
 
-var cfgFile string
-var logLevel string
+var cfgFile             string
+var logLevel            string
+var services            []Microservice
+var oasbinderAddress    string
+var oasbinderPortNumber int
+var apiSpecsPath        string
+var headers             map[string]string
 
 var log = logrus.New()
 
@@ -69,14 +75,23 @@ func newRootCommand() {
 			setLogLevel()
 
 			fmt.Println(`config = "` + cfgFile + `"`)
+			fmt.Println(`address = "` + oasbinderAddress + `"`)
+			fmt.Println(`port = ` + strconv.Itoa(oasbinderPortNumber))
+			fmt.Println(`apiSpecsPath = "` + apiSpecsPath + `"`)
 
-			// TODO implement the utility
+			serve()
 		},
 	}
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "",
 		"config file (default is $HOME/.oasbinder.yaml)")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info",
 		"Logging level (trace, debug, info, warn, error). ")
+	rootCmd.PersistentFlags().StringVarP(&oasbinderAddress, "address", "a", "http://localhost:8080",
+		"Address where oasbinder is accessed by the user. It should have the format: http[s]://hostname.example.com[:port]")
+	rootCmd.PersistentFlags().IntVarP(&oasbinderPortNumber, "port", "p", 8080,
+		"Port number on which oasbinder will be listening.")
+	rootCmd.PersistentFlags().StringVarP(&apiSpecsPath, "apiSpecsPath", "s", "/openapi.json",
+		"Path where microservices expose their API specification.")
 
 	// Add version command.
 	rootCmd.AddCommand(extension.NewVersionCobraCmd())
@@ -126,7 +141,7 @@ func Execute() {
 
 func initializeConfig() {
 	for _, v := range []string{
-		"logLevel", "workingDirectory",
+		"logLevel", "address", "port", "apiSpecsPath",
 	} {
 		// If the flag has not been set in newRootCommand() and it has been set in initConfig().
 		// In other words: if it's not been provided in command line, but has been
@@ -138,4 +153,12 @@ func initializeConfig() {
 			checkError(err)
 		}
 	}
+
+	// Read the list of microservice docs to serve.
+	err := viper.UnmarshalKey("services", &services)
+	checkError(err)
+
+	// Read the list of headers to include when making requests to microservices.
+	err = viper.UnmarshalKey("headers", &headers)
+	checkError(err)
 }
