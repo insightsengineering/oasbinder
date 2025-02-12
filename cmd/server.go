@@ -69,7 +69,7 @@ func GenerateHTML(spec []byte, serviceURL string, selectedService string, messag
 	type SwaggerUIParams struct {
 		Spec             string
 		Host             string
-		OasbinderAddress string
+		ProxyAddress     string
 		Headers          map[string]string
 		MicroserviceList []MicroserviceOption
 		SelectedService  string
@@ -86,7 +86,7 @@ func GenerateHTML(spec []byte, serviceURL string, selectedService string, messag
 	params := SwaggerUIParams{
 		Spec:             string(spec),
 		Host:             serviceURL,
-		OasbinderAddress: oasbinderAddress + "/",
+		ProxyAddress:     proxyAddress + "/",
 		Headers:          headers,
 		MicroserviceList: microserviceOptions,
 		SelectedService:  selectedService,
@@ -158,7 +158,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func serve() {
 	http.HandleFunc("/", handler)
 
-	addr := listenAddress + ":" + strconv.Itoa(oasbinderPortNumber)
+	addr := listenAddress + ":" + strconv.Itoa(listenPort)
 	log.Info("Listening on ", addr)
 
 	s := &http.Server{

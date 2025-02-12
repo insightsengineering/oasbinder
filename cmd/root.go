@@ -30,8 +30,8 @@ import (
 var cfgFile string
 var logLevel string
 var services []Microservice
-var oasbinderAddress string
-var oasbinderPortNumber int
+var proxyAddress string
+var listenPort int
 var listenAddress string
 var apiSpecsPath string
 var headers map[string]string
@@ -78,10 +78,10 @@ in a way which makes interacting with the Swagger UI in the browser easy.`,
 			setLogLevel()
 
 			fmt.Println(`config = "` + cfgFile + `"`)
-			fmt.Println(`address = "` + oasbinderAddress + `"`)
-			fmt.Println(`port = ` + strconv.Itoa(oasbinderPortNumber))
-			fmt.Println(`apiSpecsPath = "` + apiSpecsPath + `"`)
+			fmt.Println(`proxyAddress = "` + proxyAddress + `"`)
+			fmt.Println(`listenPort = ` + strconv.Itoa(listenPort))
 			fmt.Println(`listenAddress = "` + listenAddress + `"`)
+			fmt.Println(`apiSpecsPath = "` + apiSpecsPath + `"`)
 
 			serve()
 		},
@@ -90,14 +90,15 @@ in a way which makes interacting with the Swagger UI in the browser easy.`,
 		"config file (default is $HOME/.oasbinder.yaml or $HOME/.oasbinder.yml or $HOME/.oasbinder)")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info",
 		"Logging level (trace, debug, info, warn, error). ")
-	rootCmd.PersistentFlags().StringVarP(&oasbinderAddress, "address", "a", "http://localhost:8080",
+	rootCmd.PersistentFlags().StringVarP(&proxyAddress, "proxyAddress", "a", "http://localhost:8080",
 		"Address where oasbinder is accessed by the user. It should have the format: http[s]://hostname.example.com[:port]")
-	rootCmd.PersistentFlags().IntVarP(&oasbinderPortNumber, "port", "p", 8080,
-		"Port number on which oasbinder will be listening.")
-	rootCmd.PersistentFlags().StringVarP(&apiSpecsPath, "apiSpecsPath", "s", "openapi.json",
-		"Path where microservices expose their API specification.")
+	rootCmd.PersistentFlags().IntVarP(&listenPort, "listenPort", "p", 8080,
+		"The port number for the HTTP server to listen on.")
 	rootCmd.PersistentFlags().StringVarP(&listenAddress, "listenAddress", "d", "127.0.0.1",
 		"The address for the HTTP server to listen on.")
+	rootCmd.PersistentFlags().StringVarP(&apiSpecsPath, "apiSpecsPath", "s", "openapi.json",
+		"Path where microservices expose their API specification.")
+
 
 	// Add version command.
 	rootCmd.AddCommand(extension.NewVersionCobraCmd())
@@ -147,7 +148,7 @@ func Execute() {
 
 func initializeConfig() {
 	for _, v := range []string{
-		"logLevel", "address", "port", "apiSpecsPath", "listenAddress",
+		"logLevel", "proxyAddress", "listenPort", "listenAddress", "apiSpecsPath",
 	} {
 		// If the flag has not been set in newRootCommand() and it has been set in initConfig().
 		// In other words: if it's not been provided in command line, but has been

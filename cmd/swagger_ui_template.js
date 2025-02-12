@@ -3,7 +3,7 @@ window.onload = function() {
     spec: JSON.parse({{.Spec}}),
     dom_id: "#swagger-ui",
     requestInterceptor: (req) => {
-      req.url = req.url.replace({{.OasbinderAddress}}, {{.Host}});
+      req.url = req.url.replace({{.ProxyAddress}}, {{.Host}});
       {{range $key, $value := .Headers}}
       req.headers["{{$key}}"] = "{{$value}}";
       {{end}}

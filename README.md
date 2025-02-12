@@ -4,7 +4,7 @@
 
 `oasbinder` is a utility which allows you to interact with multiple Swagger (OAS) docs for multiple microservices which can be defined in the [configuration file](#configuration-file).
 
-Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at <https://oasbinder.example.com>.
+Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at <https://oasbinder.example.com> (`proxyAddress`).
 ```yaml
 services:
   - name: hogwarts
@@ -17,6 +17,8 @@ User can request the OAS docs for the `hogwarts` microservice by going to <https
 `oasbinder` will request the OAS specification from the service at <http://localhost:8000/hogwarts/openapi.json> and return it to the user for viewing and interacting in the browser.
 The location of the OAS specs is configurable.
 Multiple services can be configured and user can then select them from a drop-down list.
+
+All the services will need to have CORS configured in a way which allows requests from <https://oasbinder.example.com>.
 
 <img src="images/oasbinder.png" alt="oasbinder screenshot" width="70%">
 
@@ -50,10 +52,10 @@ Example contents of configuration file:
 
 ```yaml
 # The address at which the user will access `oasbinder`.
-address: http://localhost:8080
-# The port on which `oasbinder` will listen. This can be used in case `oasbinder` is run in e.g. in a k8s cluster
+proxyAddress: http://localhost:8080
+# The port on which `oasbinder` will listen. This can be used in case `oasbinder` is run e.g. in a k8s cluster
 # and the user is accessing it from the outside of the cluster.
-port: 8080
+listenPort: 8080
 
 services:
   - name: gringotts
