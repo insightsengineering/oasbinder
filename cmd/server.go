@@ -12,10 +12,10 @@ import (
 )
 
 //go:embed template.html
-var html_template string
+var htmlTemplate string
 
 //go:embed swagger_ui_template.js
-var swagger_ui_template string
+var swaggerUITemplate string
 
 // Microservice represents configuration for each microservice
 type Microservice struct {
@@ -92,12 +92,12 @@ func GenerateHTML(spec []byte, serviceURL string, selectedService string, messag
 		SelectedService:  selectedService,
 	}
 
-	tmpl := html_template
+	tmpl := htmlTemplate
 
 	// Only include the SwaggerUIBundle if a service is selected from drop-down list
 	// and the OAS specs have been successfully retrieved from the service.
 	if message == "" {
-		tmpl += swagger_ui_template
+		tmpl += swaggerUITemplate
 	}
 	tmpl += `</script><br />` + message + `</body></html>`
 
