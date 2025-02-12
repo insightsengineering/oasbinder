@@ -99,7 +99,6 @@ in a way which makes interacting with the Swagger UI in the browser easy.`,
 	rootCmd.PersistentFlags().StringVarP(&apiSpecsPath, "apiSpecsPath", "s", "openapi.json",
 		"Path where microservices expose their API specification.")
 
-
 	// Add version command.
 	rootCmd.AddCommand(extension.NewVersionCobraCmd())
 
