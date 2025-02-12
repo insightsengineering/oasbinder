@@ -32,6 +32,7 @@ var logLevel string
 var services []Microservice
 var oasbinderAddress string
 var oasbinderPortNumber int
+var listenAddress string
 var apiSpecsPath string
 var headers map[string]string
 
@@ -66,8 +67,10 @@ var rootCmd *cobra.Command
 func newRootCommand() {
 	rootCmd = &cobra.Command{
 		Use:   "oasbinder",
-		Short: "",
-		Long:  ``,
+		Short: "A utility to view and interact with Swagger (OAS) UI",
+		Long:  `A utility which allows the user to request OAS specification for multiple
+microservices. oasbinder will request the OAS specs on user's behalf and return it to the user
+in a way which makes interacting with the Swagger UI in the browser easy.`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
 			initializeConfig()
 		},
@@ -78,20 +81,23 @@ func newRootCommand() {
 			fmt.Println(`address = "` + oasbinderAddress + `"`)
 			fmt.Println(`port = ` + strconv.Itoa(oasbinderPortNumber))
 			fmt.Println(`apiSpecsPath = "` + apiSpecsPath + `"`)
+			fmt.Println(`listenAddress = "` + listenAddress + `"`)
 
 			serve()
 		},
 	}
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "",
-		"config file (default is $HOME/.oasbinder.yaml)")
+		"config file (default is $HOME/.oasbinder.yaml or $HOME/.oasbinder.yml or $HOME/.oasbinder)")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "logLevel", "l", "info",
 		"Logging level (trace, debug, info, warn, error). ")
 	rootCmd.PersistentFlags().StringVarP(&oasbinderAddress, "address", "a", "http://localhost:8080",
 		"Address where oasbinder is accessed by the user. It should have the format: http[s]://hostname.example.com[:port]")
 	rootCmd.PersistentFlags().IntVarP(&oasbinderPortNumber, "port", "p", 8080,
 		"Port number on which oasbinder will be listening.")
-	rootCmd.PersistentFlags().StringVarP(&apiSpecsPath, "apiSpecsPath", "s", "/openapi.json",
+	rootCmd.PersistentFlags().StringVarP(&apiSpecsPath, "apiSpecsPath", "s", "openapi.json",
 		"Path where microservices expose their API specification.")
+	rootCmd.PersistentFlags().StringVarP(&listenAddress, "listenAddress", "d", "127.0.0.1",
+		"The address for the HTTP server to listen on.")
 
 	// Add version command.
 	rootCmd.AddCommand(extension.NewVersionCobraCmd())
@@ -141,7 +147,7 @@ func Execute() {
 
 func initializeConfig() {
 	for _, v := range []string{
-		"logLevel", "address", "port", "apiSpecsPath",
+		"logLevel", "address", "port", "apiSpecsPath", "listenAddress",
 	} {
 		// If the flag has not been set in newRootCommand() and it has been set in initConfig().
 		// In other words: if it's not been provided in command line, but has been

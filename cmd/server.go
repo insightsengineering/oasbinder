@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"errors"
 )
 
 // Microservice represents configuration for each microservice
@@ -19,7 +20,12 @@ type Microservice struct {
 
 // GetOASSpec retrieves the OpenAPI specification from the specified microservice URL
 func GetOASSpec(url string) ([]byte, error) {
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", url, apiSpecsPath), nil)
+	if !strings.HasSuffix(url, "/") {
+		return nil, errors.New("Microservice URL doesn't have a trailing '/'.")
+	}
+	requestUrl := fmt.Sprintf("%s%s", url, apiSpecsPath)
+	log.Debug("Requesting ", requestUrl)
+	req, err := http.NewRequest("GET", requestUrl, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +49,7 @@ func GetOASSpec(url string) ([]byte, error) {
 }
 
 // GenerateHTML generates the HTML for viewing the OpenAPI spec using Swagger UI
-func GenerateHTML(spec []byte, serviceURL string, currentEndpoint string, message string) (string, error) {
+func GenerateHTML(spec []byte, serviceURL string, selectedService string, message string) (string, error) {
 	type MicroserviceOption struct {
 		Name     string
 		Selected bool
@@ -55,14 +61,14 @@ func GenerateHTML(spec []byte, serviceURL string, currentEndpoint string, messag
 		OasbinderAddress string
 		Headers          map[string]string
 		MicroserviceList []MicroserviceOption
-		CurrentEndpoint  string
+		SelectedService  string
 	}
 
 	microserviceOptions := []MicroserviceOption{}
 	for _, ms := range services {
 		microserviceOptions = append(microserviceOptions, MicroserviceOption{
 			Name:     ms.Name,
-			Selected: ms.Endpoint == currentEndpoint,
+			Selected: ms.Name == selectedService,
 		})
 	}
 
@@ -72,7 +78,7 @@ func GenerateHTML(spec []byte, serviceURL string, currentEndpoint string, messag
 		OasbinderAddress: oasbinderAddress + "/",
 		Headers:          headers,
 		MicroserviceList: microserviceOptions,
-		CurrentEndpoint:  currentEndpoint,
+		SelectedService:  selectedService,
 	}
 
 	tmpl := `<!DOCTYPE html>
@@ -83,7 +89,8 @@ func GenerateHTML(spec []byte, serviceURL string, currentEndpoint string, messag
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js" integrity="sha512-7ihPQv5ibiTr0DW6onbl2MIKegdT6vjpPySyIb4Ftp68kER6Z7Yiub0tFoMmCHzZfQE9+M+KSjQndv6NhYxDgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-standalone-preset.min.js" integrity="sha512-UrYi+60Ci3WWWcoDXbMmzpoi1xpERbwjPGij6wTh8fXl81qNdioNNHExr9ttnBebKF0ZbVnPlTPlw+zECUK1Xw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css" integrity="sha512-+9UD8YSD9GF7FzOH38L9S6y56aYNx3R4dYbOCgvTJ2ZHpJScsahNdaMQJU/8osUiz9FPu0YZ8wdKf4evUbsGSg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
   <style>
     .toolbar {
       margin: 20px 0;
@@ -107,7 +114,7 @@ func GenerateHTML(spec []byte, serviceURL string, currentEndpoint string, messag
   <script>
   document.getElementById('microservice-select').addEventListener('change', function() {
       var newEndpoint = this.value;
-      if (newEndpoint !== "{{.CurrentEndpoint}}") {
+      if (newEndpoint !== "{{.SelectedService}}") {
         window.location.href = newEndpoint;
       }
     });`
@@ -170,7 +177,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	html, err := GenerateHTML(spec, microserviceURL, r.URL.Path, message)
+	html, err := GenerateHTML(spec, microserviceURL, serviceName, message)
 	if err != nil {
 		http.Error(w, "Could not generate HTML", http.StatusInternalServerError)
 		log.Error(err)
@@ -182,11 +189,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func serve() {
-	log.Debug("headers = ", headers)
-
 	http.HandleFunc("/", handler)
 
-	addr := "0.0.0.0:" + strconv.Itoa(oasbinderPortNumber)
+	addr := listenAddress + ":" + strconv.Itoa(oasbinderPortNumber)
 	log.Info("Listening on ", addr)
 
 	s := &http.Server{

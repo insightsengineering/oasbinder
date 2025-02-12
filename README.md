@@ -2,9 +2,23 @@
 
 [![build](https://github.com/insightsengineering/oasbinder/actions/workflows/test.yml/badge.svg)](https://github.com/insightsengineering/oasbinder/actions/workflows/test.yml)
 
-`oasbinder` is a utility which allows you to interact with multiple Swagger (OAS) docs for multiple microservices.
+`oasbinder` is a utility which allows you to interact with multiple Swagger (OAS) docs for multiple microservices which can be defined in the [configuration file](#configuration-file).
 
-TODO add more description
+Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at https://oasbinder.example.com.
+```yaml
+services:
+  - name: hogwarts
+    endpoint: /hogwarts
+    url: http://localhost:8000/hogwarts/
+```
+
+User can request the OAS docs for the `hogwarts` microservice by going to https://oasbinder.example.com/hogwarts in the browser.
+
+`oasbinder` will request the OAS specification from the service at http://localhost:8000/hogwarts/openapi.json and return it to the user for viewing and interacting in the browser.
+The location of the OAS specs is configurable.
+Multiple services can be configured and user can then select them from a drop-down list.
+
+<img src="images/oasbinder.png"  width="70%">
 
 ## Installing
 
@@ -35,7 +49,23 @@ You can also specify custom path to configuration file with `--config <your-conf
 Example contents of configuration file:
 
 ```yaml
-# TODO
+# The address at which the user will access `oasbinder`.
+address: http://localhost:8080
+# The port on which `oasbinder` will listen. This can be used in case `oasbinder` is run in e.g. in a k8s cluster
+# and the user is accessing it from the outside of the cluster.
+port: 8080
+
+services:
+  - name: gringotts
+    endpoint: /gringotts
+    url: http://localhost:8000/gringotts/
+  - name: hogwarts
+    endpoint: /hogwarts
+    url: http://localhost:8000/hogwarts/
+
+# Additional headers to pass to microservices, e.g. for authentication.
+headers:
+  api-key: qwerty
 ```
 
 ## Environment variables
