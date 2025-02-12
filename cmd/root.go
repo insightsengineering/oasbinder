@@ -68,7 +68,7 @@ func newRootCommand() {
 	rootCmd = &cobra.Command{
 		Use:   "oasbinder",
 		Short: "A utility to view and interact with Swagger (OAS) UI",
-		Long:  `A utility which allows the user to request OAS specification for multiple
+		Long: `A utility which allows the user to request OAS specification for multiple
 microservices. oasbinder will request the OAS specs on user's behalf and return it to the user
 in a way which makes interacting with the Swagger UI in the browser easy.`,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {

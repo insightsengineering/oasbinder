@@ -1,15 +1,21 @@
 package cmd
 
 import (
+	_ "embed"
 	"fmt"
 	"html/template"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
-	"errors"
 )
+
+//go:embed template.html
+var html_template string
+
+//go:embed swagger_ui_template.js
+var swagger_ui_template string
 
 // Microservice represents configuration for each microservice
 type Microservice struct {
@@ -21,11 +27,11 @@ type Microservice struct {
 // GetOASSpec retrieves the OpenAPI specification from the specified microservice URL
 func GetOASSpec(url string) ([]byte, error) {
 	if !strings.HasSuffix(url, "/") {
-		return nil, errors.New("Microservice URL doesn't have a trailing '/'.")
+		return nil, fmt.Errorf("microservice URL doesn't have a trailing '/'")
 	}
-	requestUrl := fmt.Sprintf("%s%s", url, apiSpecsPath)
-	log.Debug("Requesting ", requestUrl)
-	req, err := http.NewRequest("GET", requestUrl, nil)
+	requestURL := fmt.Sprintf("%s%s", url, apiSpecsPath)
+	log.Debug("Requesting ", requestURL)
+	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +51,12 @@ func GetOASSpec(url string) ([]byte, error) {
 		return nil, fmt.Errorf("failed to retrieve OpenAPI spec: received status code %d", resp.StatusCode)
 	}
 
-	return ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return body, nil
 }
 
 // GenerateHTML generates the HTML for viewing the OpenAPI spec using Swagger UI
@@ -81,58 +92,12 @@ func GenerateHTML(spec []byte, serviceURL string, selectedService string, messag
 		SelectedService:  selectedService,
 	}
 
-	tmpl := `<!DOCTYPE html>
-<html>
-<head>
-  <title>Swagger UI</title>
-  <!-- Load the latest Swagger UI code and style from npm using unpkg.com -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js" integrity="sha512-7ihPQv5ibiTr0DW6onbl2MIKegdT6vjpPySyIb4Ftp68kER6Z7Yiub0tFoMmCHzZfQE9+M+KSjQndv6NhYxDgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-standalone-preset.min.js" integrity="sha512-UrYi+60Ci3WWWcoDXbMmzpoi1xpERbwjPGij6wTh8fXl81qNdioNNHExr9ttnBebKF0ZbVnPlTPlw+zECUK1Xw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui.min.css" integrity="sha512-+9UD8YSD9GF7FzOH38L9S6y56aYNx3R4dYbOCgvTJ2ZHpJScsahNdaMQJU/8osUiz9FPu0YZ8wdKf4evUbsGSg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	tmpl := html_template
 
-  <style>
-    .toolbar {
-      margin: 20px 0;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="toolbar">
-      <div class="form-group">
-        <label for="microservice-select" class="font-weight-bold">Select Microservice:</label>
-        <select id="microservice-select" class="form-control">
-          <option value=""></option>
-          {{range .MicroserviceList}}
-            <option value="{{.Name}}" {{if .Selected}}selected{{end}}>{{.Name}}</option>
-          {{end}}
-        </select>
-      </div>
-    <div id="swagger-ui"></div>
-  </div>
-  <script>
-  document.getElementById('microservice-select').addEventListener('change', function() {
-      var newEndpoint = this.value;
-      if (newEndpoint !== "{{.SelectedService}}") {
-        window.location.href = newEndpoint;
-      }
-    });`
+	// Only include the SwaggerUIBundle if a service is selected from drop-down list
+	// and the OAS specs have been successfully retrieved from the service.
 	if message == "" {
-		tmpl += `
-    window.onload = function() {
-      const ui = SwaggerUIBundle({
-        spec: JSON.parse({{.Spec}}),
-        dom_id: "#swagger-ui",
-        requestInterceptor: (req) => {
-          req.url = req.url.replace({{.OasbinderAddress}}, {{.Host}});
-          {{range $key, $value := .Headers}}
-          req.headers["{{$key}}"] = "{{$value}}";
-          {{end}}
-          return req;
-        }
-      });
-    };`
+		tmpl += swagger_ui_template
 	}
 	tmpl += `</script><br />` + message + `</body></html>`
 
@@ -185,7 +150,9 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	w.Write([]byte(html))
+	if _, err := w.Write([]byte(html)); err != nil {
+		log.Error("Failed to write response: ", err)
+	}
 }
 
 func serve() {

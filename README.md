@@ -4,7 +4,7 @@
 
 `oasbinder` is a utility which allows you to interact with multiple Swagger (OAS) docs for multiple microservices which can be defined in the [configuration file](#configuration-file).
 
-Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at https://oasbinder.example.com.
+Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at <https://oasbinder.example.com>.
 ```yaml
 services:
   - name: hogwarts
@@ -12,13 +12,13 @@ services:
     url: http://localhost:8000/hogwarts/
 ```
 
-User can request the OAS docs for the `hogwarts` microservice by going to https://oasbinder.example.com/hogwarts in the browser.
+User can request the OAS docs for the `hogwarts` microservice by going to <https://oasbinder.example.com/hogwarts> in the browser.
 
-`oasbinder` will request the OAS specification from the service at http://localhost:8000/hogwarts/openapi.json and return it to the user for viewing and interacting in the browser.
+`oasbinder` will request the OAS specification from the service at <http://localhost:8000/hogwarts/openapi.json> and return it to the user for viewing and interacting in the browser.
 The location of the OAS specs is configurable.
 Multiple services can be configured and user can then select them from a drop-down list.
 
-<img src="images/oasbinder.png"  width="70%">
+<img src="images/oasbinder.png" alt="oasbinder screenshot" width="70%">
 
 ## Installing
 
