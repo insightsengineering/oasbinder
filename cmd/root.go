@@ -83,6 +83,8 @@ in a way which makes interacting with the Swagger UI in the browser easy.`,
 			fmt.Println(`listenAddress = "` + listenAddress + `"`)
 			fmt.Println(`apiSpecsPath = "` + apiSpecsPath + `"`)
 
+			log.Debug("services = ", services)
+
 			serve()
 		},
 	}

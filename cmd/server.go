@@ -20,9 +20,9 @@ var swaggerUITemplate string
 
 // Microservice represents configuration for each microservice
 type Microservice struct {
-	Name     string `yaml:"name"`
-	Endpoint string `yaml:"endpoint"`
-	URL      string `yaml:"url"`
+	Endpoint   string `mapstructure:"endpoint"`
+	URL        string `mapstructure:"url"`
+	SwaggerURL string `mapstructure:"swagger_url"`
 }
 
 type MicroserviceList struct {
@@ -138,8 +138,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	for _, service := range services {
 		// Retrieve name and summary of each microservice to construct a drop-down list.
 		spec, serviceName, serviceSummary, err = GetOASSpec(service.URL)
+		log.Debug("serviceEndpoint = ", service.Endpoint)
 		if service.Endpoint == path {
-			microserviceURL = service.URL
+			microserviceURL = service.SwaggerURL
+			log.Debug("microserviceURL = ", microserviceURL)
 			// selectedSpec is the one which will be rendered by SwaggerUIBundle
 			selectedSpec = spec
 			if err != nil {
