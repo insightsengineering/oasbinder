@@ -12,7 +12,7 @@ services:
     swagger_url: http://localhost:8000/hogwarts/
 ```
 
-* User can request the OAS docs for the `hogwarts` microservice by going to <https://oasbinder.example.com/hogwarts> in the browser.
+* User can request the OAS docs for the microservice by going to `proxyAddress + endpoint` in the browser (in this example: <https://oasbinder.example.com/hogwarts>).
 * `oasbinder` will request the OAS specification from the service at <http://host.docker.internal:8000/hogwarts/openapi.json> and return it to the user for viewing and interacting in the browser.
 * When user interacts with the API in the browser, the requests to the API will be directed to <http://localhost:8000/hogwarts/>.
 * In many cases `url` can be equal to `swagger_url`. An example of a situation where they can be different is e.g. a docker-compose setup where both `oasbinder` and the service can communicate via internal Docker network. `oasbinder` can request the OAS specs using the internal Docker hostname, and the user will send the requests using SwaggerUI to the service from the outside of the cluster via `swagger_url`.
@@ -54,6 +54,8 @@ Example contents of configuration file:
 ```yaml
 # The address at which the user will access `oasbinder`.
 proxyAddress: http://localhost:8080
+# The address on which `oasbinder` will listen.
+listenAddress: 0.0.0.0
 # The port on which `oasbinder` will listen. This can be used in case `oasbinder` is run e.g. in a k8s cluster
 # and the user is accessing it from the outside of the cluster.
 listenPort: 8080
