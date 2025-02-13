@@ -37,7 +37,7 @@ kos:
       - darwin/amd64
       - darwin/arm64
     labels:
-      - "org.opencontainers.image.created": "{{ .Date }}"
-      - "org.opencontainers.image.title": "{{ .ProjectName }}"
-      - "org.opencontainers.image.revision": "{{ .FullCommit }}"
-      - "org.opencontainers.image.version": "{{ .Version }}"
+      "org.opencontainers.image.created": "{{ .Date }}"
+      "org.opencontainers.image.title": "{{ .ProjectName }}"
+      "org.opencontainers.image.revision": "{{ .FullCommit }}"
+      "org.opencontainers.image.version": "{{ .Version }}"
