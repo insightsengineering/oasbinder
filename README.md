@@ -8,14 +8,16 @@ Let's assume we have the following service in the configuration file and the use
 ```yaml
 services:
   - endpoint: /hogwarts
-    url: http://localhost:8000/hogwarts/
+    url: http://host.docker.internal:8000/hogwarts/
+    swagger_url: http://localhost:8000/hogwarts/
 ```
 
-User can request the OAS docs for the `hogwarts` microservice by going to <https://oasbinder.example.com/hogwarts> in the browser.
-
-`oasbinder` will request the OAS specification from the service at <http://localhost:8000/hogwarts/openapi.json> and return it to the user for viewing and interacting in the browser.
-The location of the OAS specs is configurable.
-Multiple services can be configured and user can then select them from a drop-down list.
+* User can request the OAS docs for the `hogwarts` microservice by going to <https://oasbinder.example.com/hogwarts> in the browser.
+* `oasbinder` will request the OAS specification from the service at <http://host.docker.internal:8000/hogwarts/openapi.json> and return it to the user for viewing and interacting in the browser.
+* When user interacts with the API in the browser, the requests to the API will be directed to <http://localhost:8000/hogwarts/>.
+* In many cases `url` can be equal to `swagger_url`. An example of a situation where they can be different is e.g. a docker-compose setup where both `oasbinder` and the service can communicate via internal Docker network. `oasbinder` can request the OAS specs using the internal Docker hostname, and the user will send the requests using SwaggerUI to the service from the outside of the cluster via `swagger_url`.
+* The location of the OAS specs (`openapi.json` by default) is configurable. Multiple services can be configured and user can then select them from a drop-down list.
+* The drop-down list will contain the name and decription of the service retrieved from the OAS specs fields: `.info.title` and `.info.summary`.
 
 All the services will need to have CORS configured in a way which allows requests from <https://oasbinder.example.com>.
 
@@ -59,8 +61,10 @@ listenPort: 8080
 services:
   - endpoint: /gringotts
     url: http://localhost:8000/gringotts/
+    swagger_url: http://localhost:8000/gringotts/
   - endpoint: /hogwarts
     url: http://localhost:8000/hogwarts/
+    swagger_url: http://localhost:8000/hogwarts/
 
 # Additional headers to pass to microservices, e.g. for authentication.
 headers:
