@@ -25,7 +25,8 @@ checksum:
 changelog:
   sort: asc
 kos:
-  - repository: ghcr.io/insightsengineering/{{ .ProjectName }}
+  - repositories:
+      - "ghcr.io/insightsengineering/{{ .ProjectName }}"
     tags:
       - "v{{.Version}}"
       - latest
