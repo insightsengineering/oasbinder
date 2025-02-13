@@ -2,6 +2,7 @@ package cmd
 
 import (
 	_ "embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -24,16 +25,30 @@ type Microservice struct {
 	URL      string `yaml:"url"`
 }
 
+type MicroserviceList struct {
+	Name     string
+	Endpoint string
+	Selected bool
+}
+
+// OpenAPISpec represents the structure of the OpenAPI specification for extracting info fields.
+type OpenAPISpec struct {
+	Info struct {
+		ServiceTitle   string `json:"title"`
+		ServiceSummary string `json:"summary"`
+	} `json:"info"`
+}
+
 // GetOASSpec retrieves the OpenAPI specification from the specified microservice URL
-func GetOASSpec(url string) ([]byte, error) {
+func GetOASSpec(url string) ([]byte, string, string, error) {
 	if !strings.HasSuffix(url, "/") {
-		return nil, fmt.Errorf("microservice URL doesn't have a trailing '/'")
+		return nil, "", "", fmt.Errorf("microservice URL doesn't have a trailing '/'")
 	}
 	requestURL := fmt.Sprintf("%s%s", url, apiSpecsPath)
 	log.Debug("Requesting ", requestURL)
 	req, err := http.NewRequest("GET", requestURL, nil)
 	if err != nil {
-		return nil, err
+		return nil, "", "", err
 	}
 
 	for key, value := range headers {
@@ -43,44 +58,37 @@ func GetOASSpec(url string) ([]byte, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, "", "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to retrieve OpenAPI spec: received status code %d", resp.StatusCode)
+		return nil, "", "", fmt.Errorf("failed to retrieve OpenAPI spec: received status code %d", resp.StatusCode)
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, "", "", err
 	}
 
-	return body, nil
+	var spec OpenAPISpec
+	if err := json.Unmarshal(body, &spec); err != nil {
+		return nil, "", "", err
+	}
+
+	return body, spec.Info.ServiceTitle, spec.Info.ServiceSummary, nil
 }
 
 // GenerateHTML generates the HTML for viewing the OpenAPI spec using Swagger UI
-func GenerateHTML(spec []byte, serviceURL string, selectedService string, message string) (string, error) {
-	type MicroserviceOption struct {
-		Name     string
-		Selected bool
-	}
-
+func GenerateHTML(spec []byte, microserviceList []MicroserviceList, serviceURL, selectedService, serviceSummary, message string) (string, error) {
 	type SwaggerUIParams struct {
 		Spec             string
 		Host             string
 		ProxyAddress     string
 		Headers          map[string]string
-		MicroserviceList []MicroserviceOption
+		MicroserviceList []MicroserviceList
 		SelectedService  string
-	}
-
-	microserviceOptions := []MicroserviceOption{}
-	for _, ms := range services {
-		microserviceOptions = append(microserviceOptions, MicroserviceOption{
-			Name:     ms.Name,
-			Selected: ms.Name == selectedService,
-		})
+		ServiceSummary   string
 	}
 
 	params := SwaggerUIParams{
@@ -88,8 +96,9 @@ func GenerateHTML(spec []byte, serviceURL string, selectedService string, messag
 		Host:             serviceURL,
 		ProxyAddress:     proxyAddress + "/",
 		Headers:          headers,
-		MicroserviceList: microserviceOptions,
+		MicroserviceList: microserviceList,
 		SelectedService:  selectedService,
+		ServiceSummary:   serviceSummary,
 	}
 
 	tmpl := htmlTemplate
@@ -116,33 +125,45 @@ func GenerateHTML(spec []byte, serviceURL string, selectedService string, messag
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	log.Debug("path = ", r.URL.Path)
-	serviceName := strings.TrimPrefix(r.URL.Path, "/")
-	log.Debug("serviceName = ", serviceName)
-	microserviceURL := ""
+	path := r.URL.Path
+	log.Debug("path = ", path)
+
+	message := ""
+	var spec []byte
+	var selectedSpec []byte
+	var err error
+	var serviceName, serviceSummary, microserviceURL string
+
+	microserviceList := []MicroserviceList{}
 	for _, service := range services {
-		if service.Name == serviceName {
+		// Retrieve name and summary of each microservice to construct a drop-down list.
+		spec, serviceName, serviceSummary, err = GetOASSpec(service.URL)
+		if service.Endpoint == path {
 			microserviceURL = service.URL
-			break
+			// selectedSpec is the one which will be rendered by SwaggerUIBundle
+			selectedSpec = spec
+			if err != nil {
+				message = "Could not retrieve OpenAPI spec: " + err.Error()
+			}
 		}
+		if err != nil {
+			log.Error("Could not retrieve OpenAPI spec: " + err.Error())
+			continue
+		}
+		microserviceList = append(microserviceList, MicroserviceList{
+			Name:     serviceName + " — " + serviceSummary,
+			Endpoint: service.Endpoint,
+			Selected: service.Endpoint == path,
+		})
 	}
 
 	log.Debug("microserviceURL = ", microserviceURL)
 
-	message := ""
-	var spec []byte
-	var err error
-
 	if microserviceURL == "" {
 		message = "Please select a service from the list."
-	} else {
-		spec, err = GetOASSpec(microserviceURL)
-		if err != nil {
-			message = "Could not retrieve OpenAPI spec: " + err.Error()
-		}
 	}
 
-	html, err := GenerateHTML(spec, microserviceURL, serviceName, message)
+	html, err := GenerateHTML(selectedSpec, microserviceList, microserviceURL, serviceName, serviceSummary, message)
 	if err != nil {
 		http.Error(w, "Could not generate HTML", http.StatusInternalServerError)
 		log.Error(err)

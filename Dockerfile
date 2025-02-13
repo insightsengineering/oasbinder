@@ -1,7 +1,6 @@
 FROM scratch
-ARG PROJECT_NAME="oasbinder"
-ENV PROJECT_NAME=${PROJECT_NAME}
-COPY ${PROJECT_NAME} /
+COPY oasbinder /
 WORKDIR /
 # hadolint ignore=DL3025
-ENTRYPOINT ${PROJECT_NAME}
+EXPOSE 8080
+ENTRYPOINT ["/oasbinder"]

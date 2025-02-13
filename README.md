@@ -7,8 +7,7 @@
 Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at <https://oasbinder.example.com> (`proxyAddress`).
 ```yaml
 services:
-  - name: hogwarts
-    endpoint: /hogwarts
+  - endpoint: /hogwarts
     url: http://localhost:8000/hogwarts/
 ```
 
@@ -58,11 +57,9 @@ proxyAddress: http://localhost:8080
 listenPort: 8080
 
 services:
-  - name: gringotts
-    endpoint: /gringotts
+  - endpoint: /gringotts
     url: http://localhost:8000/gringotts/
-  - name: hogwarts
-    endpoint: /hogwarts
+  - endpoint: /hogwarts
     url: http://localhost:8000/hogwarts/
 
 # Additional headers to pass to microservices, e.g. for authentication.

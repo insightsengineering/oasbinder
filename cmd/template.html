@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
   <title>Swagger UI</title>
   <!-- Load the latest Swagger UI code and style from npm using unpkg.com -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js" integrity="sha512-7ihPQv5ibiTr0DW6onbl2MIKegdT6vjpPySyIb4Ftp68kER6Z7Yiub0tFoMmCHzZfQE9+M+KSjQndv6NhYxDgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -22,7 +23,7 @@
         <select id="microservice-select" class="form-control">
           <option value=""></option>
           {{range .MicroserviceList}}
-            <option value="{{.Name}}" {{if .Selected}}selected{{end}}>{{.Name}}</option>
+            <option value="{{.Endpoint}}" {{if .Selected}}selected{{end}}>{{.Name}}</option>
           {{end}}
         </select>
       </div>
