@@ -31,26 +31,32 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup Go 🐹
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.23.6
-          cache: true
-          cache-dependency-path: go.sum
+      # - name: Setup Go 🐹
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version: 1.23.6
+      #     cache: true
+      #     cache-dependency-path: go.sum
 
-      - name: Log in to the Container registry 🗝
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Log in to the Container registry 🗝
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ${{ env.REGISTRY }}
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run GoReleaser 🚀
-        uses: goreleaser/goreleaser-action@v6
+      # - name: Run GoReleaser 🚀
+      #   uses: goreleaser/goreleaser-action@v6
+      #   with:
+      #     distribution: goreleaser
+      #     version: latest
+      #     args: release --clean
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.7.0
         with:
-          distribution: goreleaser
-          version: latest
-          args: release --clean
+          charts_dir: helm
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
