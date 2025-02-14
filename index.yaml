@@ -33,6 +33,16 @@ entries:
     version: 0.0.3-rc8
   - apiVersion: v2
     appVersion: 1.16.0
+    created: "2025-02-14T14:27:17.147788108Z"
+    description: A Helm chart for Kubernetes
+    digest: 3811a4dfe2c446d93d0e4193e7241233cc11684825c0463d43c565799c457d5c
+    name: oasbinder
+    type: application
+    urls:
+    - https://github.com/insightsengineering/oasbinder/releases/download/v0.0.3-rc12/oasbinder-0.0.3-rc12.tgz
+    version: 0.0.3-rc12
+  - apiVersion: v2
+    appVersion: 1.16.0
     created: "2025-02-14T14:14:04.782786157Z"
     description: A Helm chart for Kubernetes
     digest: 878491ca6da08a5426a1de9445d1d22ca0f1ddeaf2be55fcdbac3682ae8d1c1a
@@ -41,4 +51,4 @@ entries:
     urls:
     - https://github.com/insightsengineering/oasbinder/releases/download/v0.0.3-rc10/oasbinder-0.0.3-rc10.tgz
     version: 0.0.3-rc10
-generated: "2025-02-14T14:14:04.782831431Z"
+generated: "2025-02-14T14:27:17.147814106Z"
