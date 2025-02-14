@@ -17,7 +17,7 @@ permissions: read-all
 
 jobs:
   chart-releaser:
-    name: chart-releaser
+    name: Create Release 🥇
     permissions:
       contents: write
       packages: write
@@ -31,7 +31,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set chart-releaser configuration
+      - name: Set chart-releaser configuration ⚙️
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
@@ -39,7 +39,7 @@ jobs:
           release-name-template: "v{{ .Version }}"
           EOF
 
-      - name: Run chart-releaser
+      - name: Run chart-releaser ⛵
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: helm
@@ -50,7 +50,7 @@ jobs:
   # goreleaser runs in a separate job because it needs a clean git state.
   goreleaser:
     needs: chart-releaser
-    name: Create Release 🥇
+    name: Run goreleaser 🐹
     permissions:
       contents: write
       packages: write
