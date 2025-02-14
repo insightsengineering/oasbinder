@@ -11,7 +11,7 @@ spec:
     - port: 80
       targetPort: {{ .Values.service.port }}
       protocol: TCP
-      name: api-port
+      name: http
   selector:
     app: {{ include "oasbinder.fullname" . }}
 #
