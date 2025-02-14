@@ -63,3 +63,7 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+oasbinderConfig:
+  oasbinder.yaml: |
+    # oasbinder configuration should be added here.
