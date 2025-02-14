@@ -16,8 +16,8 @@ env:
 permissions: read-all
 
 jobs:
-  release:
-    name: Create Release 🥇
+  chart-releaser:
+    name: chart-releaser
     permissions:
       contents: write
       packages: write
@@ -38,7 +38,6 @@ jobs:
           cat << EOF > chart-releaser-config.yaml
           release-name-template: "v{{ .Version }}"
           EOF
-        shell: bash
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
@@ -48,6 +47,18 @@ jobs:
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
 
+  # goreleaser runs in a separate job because it needs a clean git state.
+  goreleaser:
+    needs: chart-releaser
+    name: Create Release 🥇
+    permissions:
+      contents: write
+      packages: write
+    defaults:
+      run:
+        shell: bash
+    runs-on: ubuntu-latest
+    steps:
       - name: Setup Go 🐹
         uses: actions/setup-go@v5
         with:
