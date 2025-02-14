@@ -54,15 +54,19 @@ jobs:
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set git config
+      - name: Set chart-releaser configuration
         run: |
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
+          cat << EOF > chart-releaser-config.yaml
+          release-name-template: "v{{ .Version }}"
+          EOF
         shell: bash
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: helm
+          config: chart-releaser-config.yaml
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
