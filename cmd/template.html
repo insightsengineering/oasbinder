@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>Swagger UI</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>oasbinder</title>
   <!-- Load the latest Swagger UI code and style from npm using unpkg.com -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js" integrity="sha512-7ihPQv5ibiTr0DW6onbl2MIKegdT6vjpPySyIb4Ftp68kER6Z7Yiub0tFoMmCHzZfQE9+M+KSjQndv6NhYxDgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-standalone-preset.min.js" integrity="sha512-UrYi+60Ci3WWWcoDXbMmzpoi1xpERbwjPGij6wTh8fXl81qNdioNNHExr9ttnBebKF0ZbVnPlTPlw+zECUK1Xw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -10,29 +11,150 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
   <style>
-    .toolbar {
-      margin: 20px 0;
+    body {
+      display: flex;
+      height: 100vh;
+      margin-top: 56px; /* Adjust based on the height of the navbar */
+    }
+    .sidebar {
+      height: 100vh;
+      max-width: 30%;
+      flex: 0 0 400px;
+    }
+    .content {
+      flex-grow: 1;
+      padding: 15px;
+    }
+    .sidebar img {
+      max-width: 100%;
+      margin-bottom: 15px;
+    }
+    .navbar {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      z-index: 1000;
+      height: 56px; /* Standard navbar height; adjust if needed */
+    }
+    .navbar-brand {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem; /* Adjust based on the desired size */
+      font-weight: bold;
+    }
+    .navbar-nav {
+      flex-grow: 0;
+    }
+    .sidebar-title {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 1.25rem; /* Adjust based on design preference */
+    }
+    .subtitle {
+      font-weight: bold;
+      text-align: center;
+      padding: 15px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="toolbar">
-      <div class="form-group">
-        <label for="microservice-select" class="font-weight-bold">Select Microservice:</label>
-        <select id="microservice-select" class="form-control">
-          <option value=""></option>
-          {{range .MicroserviceList}}
-            <option value="{{.Endpoint}}" {{if .Selected}}selected{{end}}>{{.Name}}</option>
-          {{end}}
-        </select>
-      </div>
-    <div id="swagger-ui"></div>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">oasbinder</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal1">Button 1</button>
+        </li>
+        <li class="nav-item">
+          <button class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#modal2">Button 2</button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <div class="sidebar bg-light p-3">
+    <img src="placeholder.jpg" alt="Image">
+    <div class="sidebar-title">Select Service</div>
+    <ul class="nav flex-column">
+      {{range .MicroserviceList}}
+        <li class="nav-item">
+          <button data-target="{{.Endpoint}}" class="btn {{if .Selected}}btn-primary {{else}} btn-outline-primary{{end}} mb-2">{{.Name}}</button>
+        </li>
+      {{end}}
+    </ul>
   </div>
+  <div class="content">
+    <div class="subtitle">TODO add service title here</div>
+    <div id="mainContent">
+      <div class="sidebar-title">{{ .Message }}</div>
+      <div id="swagger-ui"></div>
+    </div>
+  </div>
+
+    <!-- Modal structures -->
+  <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="modal1Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal1Label">Modal 1</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          a<!-- Content populated by the HTTP server -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="modal2Label" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modal2Label">Modal 2</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          a<!-- Content populated by the HTTP server -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.2/umd/popper.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js"></script>
   <script>
-  document.getElementById('microservice-select').addEventListener('change', function() {
-      var newEndpoint = this.value;
-      if (newEndpoint !== "{{.SelectedService}}") {
-        window.location.href = newEndpoint;
-      }
+    document.querySelectorAll('button[data-target]').forEach(button => {
+      button.addEventListener('click', function () {
+        const target = button.getAttribute('data-target');
+        window.location.href = `${window.location.origin}/${target}`;
+      });
     });
+
+    window.onload = function() {
+      if ({{ .DisplaySwaggerUI }}) {
+        const ui = SwaggerUIBundle({
+          spec: JSON.parse({{.Spec}}),
+          dom_id: "#swagger-ui",
+          requestInterceptor: (req) => {
+            req.url = req.url.replace({{.ProxyAddress}}, {{.Host}});
+            {{range $key, $value := .Headers}}
+            req.headers["{{$key}}"] = "{{$value}}";
+            {{end}}
+            return req;
+          }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
