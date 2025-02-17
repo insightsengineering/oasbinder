@@ -28,7 +28,7 @@ kos:
   - repositories:
       - "ghcr.io/insightsengineering/oasbinder"
     tags:
-      - "v{{.Version}}"
+      - "{{.Version}}"
       - latest
     bare: true
     preserve_import_paths: false
@@ -42,3 +42,6 @@ kos:
       "org.opencontainers.image.title": "{{ .ProjectName }}"
       "org.opencontainers.image.revision": "{{ .FullCommit }}"
       "org.opencontainers.image.version": "{{ .Version }}"
+# Append release notes to the release created by chart-releaser-action.
+release:
+  mode: append
