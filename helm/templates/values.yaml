@@ -41,10 +41,12 @@ livenessProbe:
   httpGet:
     path: /
     port: http
+  periodSeconds: 60
 readinessProbe:
   httpGet:
     path: /
     port: http
+  periodSeconds: 60
 
 autoscaling:
   enabled: false
