@@ -28,7 +28,7 @@ kos:
   - repositories:
       - "ghcr.io/insightsengineering/oasbinder"
     tags:
-      - "v{{.Version}}"
+      - "{{.Version}}"
       - latest
     bare: true
     preserve_import_paths: false
