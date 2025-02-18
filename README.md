@@ -34,6 +34,14 @@ Alternatively, if you have a Go environment, you can simply install `oasbinder` 
 go install github.com/insightsengineering/oasbinder@latest
 ```
 
+A helm chart is also available. You can install the `oasbinder` helm chart with:
+
+```bash
+helm install oasbinder -f helm/templates/values.yaml oasbinder --repo https://insightsengineering.github.io/oasbinder/ --version 0.0.3 --namespace <namespace-name>
+```
+
+Example `values.yaml` file is available in [helm/templates/values.yaml](helm/templates/values.yaml).
+
 ## Usage
 
 `oasbinder` is a command line utility, so after installing the binary in your `PATH`, simply run the following command to view its capabilities:
