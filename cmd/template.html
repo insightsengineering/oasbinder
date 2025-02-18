@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>oasbinder</title>
+  <title>OAS Binder</title>
   <!-- Load the latest Swagger UI code and style from npm using unpkg.com -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-bundle.min.js" integrity="sha512-7ihPQv5ibiTr0DW6onbl2MIKegdT6vjpPySyIb4Ftp68kER6Z7Yiub0tFoMmCHzZfQE9+M+KSjQndv6NhYxDgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.17.14/swagger-ui-standalone-preset.min.js" integrity="sha512-UrYi+60Ci3WWWcoDXbMmzpoi1xpERbwjPGij6wTh8fXl81qNdioNNHExr9ttnBebKF0ZbVnPlTPlw+zECUK1Xw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -52,32 +52,24 @@
       margin-bottom: 15px;
       font-size: 1.25rem; /* Adjust based on design preference */
     }
-    .subtitle {
-      font-weight: bold;
-      text-align: center;
-      padding: 15px;
-    }
   </style>
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">oasbinder</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon"></span>
-    </button>
+    <a class="navbar-brand" href="#">OAS Binder</a>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal1">Button 1</button>
+          <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal1">⚙</button>
         </li>
         <li class="nav-item">
-          <button class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#modal2">Button 2</button>
+          <button class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#modal2">❓</button>
         </li>
       </ul>
     </div>
   </nav>
   <div class="sidebar bg-light p-3">
-    <img src="placeholder.jpg" alt="Image">
+    <img src="https://cdnlogo.com/logos/o/44/openapi-wordmark.svg" alt="">
     <div class="sidebar-title">Select Service</div>
     <ul class="nav flex-column">
       {{range .MicroserviceList}}
@@ -88,7 +80,6 @@
     </ul>
   </div>
   <div class="content">
-    <div class="subtitle">TODO add service title here</div>
     <div id="mainContent">
       <div class="sidebar-title">{{ .Message }}</div>
       <div id="swagger-ui"></div>
@@ -100,11 +91,13 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modal1Label">Modal 1</h5>
+          <h5 class="modal-title" id="modal1Label">OAS Binder configuration</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          a<!-- Content populated by the HTTP server -->
+          <pre>
+            {{ .OASBinderConfiguration }}
+          </pre>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -117,11 +110,17 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="modal2Label">Modal 2</h5>
+          <h5 class="modal-title" id="modal2Label">About OAS Binder</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          a<!-- Content populated by the HTTP server -->
+          A tool to interact with OAS docs for multiple microservices
+          <br />
+          URL: <a href="https://github.com/insightsengineering/oasbinder">https://github.com/insightsengineering/oasbinder</a>
+          <br />
+          <pre>
+            {{ .AboutOASBinder }}
+          </pre>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
