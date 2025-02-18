@@ -4,14 +4,15 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"go.szostok.io/version"
-	"gopkg.in/yaml.v3"
 	"html/template"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"go.szostok.io/version"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed template.html
