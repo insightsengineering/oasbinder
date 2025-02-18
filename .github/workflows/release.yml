@@ -46,8 +46,8 @@ jobs:
           echo "=========================="
           cat helm/templates/Chart.yaml
           echo "=========================="
-          yq e -i '.version = ${{ steps.branch-name.outputs.tag }}' helm/templates/Chart.yaml
-          yq e -i '.appVersion = ${{ steps.branch-name.outputs.tag }}' helm/templates/Chart.yaml
+          yq e -i '.version = "${{ steps.branch-name.outputs.tag }}"' helm/templates/Chart.yaml
+          yq e -i '.appVersion = "${{ steps.branch-name.outputs.tag }}"' helm/templates/Chart.yaml
           echo "=========================="
           cat helm/templates/Chart.yaml
           echo "=========================="
