@@ -67,5 +67,7 @@ tolerations: []
 affinity: {}
 
 oasbinderConfig:
-  oasbinder.yaml: |
-    # oasbinder configuration should be added here.
+  # oasbinder configuration should be added here, directly as YAML structure.
+  # proxyAddress:
+  # services:
+  # headers:
