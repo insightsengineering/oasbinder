@@ -10,13 +10,13 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"go.szostok.io/version"
+	"gopkg.in/yaml.v3"
 )
 
 //go:embed template.html
 var htmlTemplate string
-
-//go:embed swagger_ui_template.js
-var swaggerUITemplate string
 
 // Microservice represents configuration for each microservice
 type Microservice struct {
@@ -81,36 +81,62 @@ func GetOASSpec(url string) ([]byte, string, string, error) {
 
 // GenerateHTML generates the HTML for viewing the OpenAPI spec using Swagger UI
 func GenerateHTML(spec []byte, microserviceList []MicroserviceList, serviceURL, selectedService, serviceSummary, message string) (string, error) {
+
+	servicesYaml, err := yaml.Marshal(&services)
+	checkError(err)
+
+	headersYaml, err := yaml.Marshal(&headers)
+	checkError(err)
+
+	oasBinderConfiguration := `
+config = "` + cfgFile + `"
+proxyAddress = "` + proxyAddress + `"
+listenPort = ` + strconv.Itoa(listenPort) + `
+listenAddress = "` + listenAddress + `"
+apiSpecsPath = "` + apiSpecsPath + `"
+services =
+` + string(servicesYaml) + `headers = ` + string(headersYaml)
+
+	versionInfo := version.Get()
+
+	aboutOasBinder := `
+Version: ` + versionInfo.Version + `
+Git Commit: ` + versionInfo.GitCommit + `
+Build Date: ` + versionInfo.BuildDate + `
+Commit Date: ` + versionInfo.CommitDate + `
+Go Version: ` + versionInfo.GoVersion + `
+Compiler: ` + versionInfo.Compiler + `
+Platform: ` + versionInfo.Platform
+
 	type SwaggerUIParams struct {
-		Spec             string
-		Host             string
-		ProxyAddress     string
-		Headers          map[string]string
-		MicroserviceList []MicroserviceList
-		SelectedService  string
-		ServiceSummary   string
+		Spec                   string
+		Host                   string
+		ProxyAddress           string
+		Headers                map[string]string
+		MicroserviceList       []MicroserviceList
+		SelectedService        string
+		ServiceSummary         string
+		DisplaySwaggerUI       bool
+		Message                string
+		OASBinderConfiguration string
+		AboutOASBinder         string
 	}
 
 	params := SwaggerUIParams{
-		Spec:             string(spec),
-		Host:             serviceURL,
-		ProxyAddress:     proxyAddress + "/",
-		Headers:          headers,
-		MicroserviceList: microserviceList,
-		SelectedService:  selectedService,
-		ServiceSummary:   serviceSummary,
+		Spec:                   string(spec),
+		Host:                   serviceURL,
+		ProxyAddress:           proxyAddress + "/",
+		Headers:                headers,
+		MicroserviceList:       microserviceList,
+		SelectedService:        selectedService,
+		ServiceSummary:         serviceSummary,
+		DisplaySwaggerUI:       message == "",
+		Message:                message,
+		OASBinderConfiguration: oasBinderConfiguration,
+		AboutOASBinder:         aboutOasBinder,
 	}
 
-	tmpl := htmlTemplate
-
-	// Only include the SwaggerUIBundle if a service is selected from drop-down list
-	// and the OAS specs have been successfully retrieved from the service.
-	if message == "" {
-		tmpl += swaggerUITemplate
-	}
-	tmpl += `</script><br />` + message + `</body></html>`
-
-	t, err := template.New("swaggerui").Parse(tmpl)
+	t, err := template.New("swaggerui").Parse(htmlTemplate)
 	if err != nil {
 		return "", err
 	}
