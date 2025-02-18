@@ -45,14 +45,8 @@ jobs:
           cat << EOF > chart-releaser-config.yaml
           release-name-template: "v{{ .Version }}"
           EOF
-          echo "=========================="
-          cat helm/templates/Chart.yaml
-          echo "=========================="
           yq e -i '.version = "${{ steps.branch-name.outputs.tag }}"' helm/templates/Chart.yaml
           yq e -i '.appVersion = "${{ steps.branch-name.outputs.tag }}"' helm/templates/Chart.yaml
-          echo "=========================="
-          cat helm/templates/Chart.yaml
-          echo "=========================="
 
       - name: Run chart-releaser ⛵
         uses: helm/chart-releaser-action@v1.7.0
