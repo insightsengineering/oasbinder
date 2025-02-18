@@ -16,8 +16,50 @@ env:
 permissions: read-all
 
 jobs:
-  release:
+  chart-releaser:
     name: Create Release 🥇
+    permissions:
+      contents: write
+      packages: write
+    defaults:
+      run:
+        shell: bash
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get branch names 🌿
+        id: branch-name
+        uses: tj-actions/branch-names@v7
+        with:
+          strip_tag_prefix: v
+
+      - name: Checkout Repo 🛎
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set chart-releaser configuration ⚙️
+        run: |
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          # Override the default chart-releaser release name.
+          cat << EOF > chart-releaser-config.yaml
+          release-name-template: "v{{ .Version }}"
+          EOF
+          yq e -i '.version = "${{ steps.branch-name.outputs.tag }}"' helm/templates/Chart.yaml
+          yq e -i '.appVersion = "${{ steps.branch-name.outputs.tag }}"' helm/templates/Chart.yaml
+
+      - name: Run chart-releaser ⛵
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          charts_dir: helm
+          config: chart-releaser-config.yaml
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  # goreleaser runs in a separate job because it needs a clean git state.
+  goreleaser:
+    needs: chart-releaser
+    name: Run goreleaser 🐹
     permissions:
       contents: write
       packages: write
@@ -53,4 +95,5 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
