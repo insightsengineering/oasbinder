@@ -5,6 +5,7 @@
 `oasbinder` is a utility which allows you to interact with multiple Swagger (OAS) docs for multiple microservices which can be defined in the [configuration file](#configuration-file).
 
 Let's assume we have the following service in the configuration file and the user accesses `oasbinder` at <https://oasbinder.example.com> (`proxyAddress`).
+
 ```yaml
 services:
   - endpoint: /hogwarts
@@ -98,7 +99,7 @@ This project is built with the [Go programming language](https://go.dev/).
 
 ### Development Environment
 
-It is recommended to use Go 1.23+ for developing this project.
+It is recommended to use Go 1.24+ for developing this project.
 This project uses a pre-commit configuration and it is recommended to [install and use pre-commit](https://pre-commit.com/#install) when you are developing this project.
 
 ### Common Commands
