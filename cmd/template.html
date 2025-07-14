@@ -4,14 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OAS Binder</title>
-  <!-- Load the latest Swagger UI code and style -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-bundle.min.js" integrity="sha512-9tBcCofqWq+PelL6USpUB7OJrCaObfefi9ht9nVZuKt1XP7eHDs7NwVljLSLVtSsErax1Tz3pG3O82eeq546Rg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui-standalone-preset.min.js" integrity="sha512-RYT3vTu8lWSgdoB5zNck/WogIqUb/ap/ivTr6t2LeS+MwqxRQsnSHkHpJRKjnC4T2fH7OMTxxQoC3jh7KGd3HA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js" integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.18.2/swagger-ui.min.css" integrity="sha512-xRGj65XGEcpPTE7Cn6ujJWokpXVLxqLxdtNZ/n1w52+76XaCRO7UWKZl9yJHvzpk99A0EP6EW+opPcRwPDxwkA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- Load styles -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.26.2/swagger-ui.min.css" integrity="sha512-FCw+cnh2A20omSXcIdoLnqQrVbcPiyAPEjKlSZdj6uIR++Xx0VIduMmFZhzYm/gf7bqmZ7dzP3+WVn2Gfr5TjQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.13.1/font/bootstrap-icons.min.css" integrity="sha512-t7Few9xlddEmgd3oKZQahkNI4dS6l80+eGEzFQiqtyVYdvcSG2D3Iub77R20BdotfRPA9caaRkg1tyaJiPmO0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+  <!-- ===== CUSTOM STYLES ===== -->
   <style>
     body {
       display: flex;
@@ -22,14 +20,19 @@
       height: 100vh;
       max-width: 30%;
       flex: 0 0 400px;
+      transition: all 0.3s ease;
+      overflow: hidden;
+      background-color: #000000 !important;
+    }
+    .sidebar-content {
+      height: 100%;
+      overflow-y: auto;
+      padding: 10px;
     }
     .content {
       flex-grow: 1;
       padding: 15px;
-    }
-    .sidebar img {
-      max-width: 100%;
-      margin-bottom: 15px;
+      transition: all 0.3s ease;
     }
     .navbar {
       position: fixed;
@@ -45,42 +48,102 @@
       font-size: 1.5rem;
       font-weight: bold;
     }
+    .navbar-brand-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-left: 15px;
+    }
+    .navbar-logo {
+      height: 30px;
+      width: auto;
+    }
     .navbar-nav {
       flex-grow: 0;
+      padding-right: 15px;
     }
     .sidebar-title {
       text-align: center;
       font-weight: bold;
-      margin-bottom: 15px;
-      font-size: 1.25rem;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      color: white;
+    }
+    .service-buttons {
+      transition: all 0.3s ease;
+    }
+    .sidebar .btn {
+      font-size: 0.8rem;
+      padding: 0.375rem 0.75rem;
+      margin-bottom: 0.5rem;
+      width: 100%;
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+      color: #495057;
+    }
+    .sidebar .btn:hover {
+      background-color: #e9ecef;
+      border-color: #adb5bd;
+      color: #212529;
+    }
+    .sidebar .btn-primary {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: white;
+    }
+    .sidebar .btn-primary:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+      color: white;
+    }
+    .sidebar .nav-item {
+      margin-bottom: 0.25rem;
     }
   </style>
 </head>
+
+<!-- ===== BODY ===== -->
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">OAS Binder</a>
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar navbar-expand-lg navbar-light" style="background-color: #afddfd;">
+    <div class="navbar-brand-container">
+      <img src="https://cdnlogo.com/logos/o/44/openapi-wordmark.svg" alt="OpenAPI" class="navbar-logo">
+      <a class="navbar-brand" href="#">OAS Binder</a>
+    </div>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item">
-          <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal1">⚙</button>
+          <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modal1">
+            <i class="bi bi-gear-fill"></i>
+          </button>
         </li>
         <li class="nav-item">
-          <button class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#modal2">❓</button>
+          <button class="btn btn-warning ms-2" data-bs-toggle="modal" data-bs-target="#modal2">
+            <i class="bi bi-question-circle-fill"></i>
+          </button>
         </li>
       </ul>
     </div>
   </nav>
-  <div class="sidebar bg-light p-3">
-    <img src="https://cdnlogo.com/logos/o/44/openapi-wordmark.svg" alt="">
-    <div class="sidebar-title">Select Service</div>
-    <ul class="nav flex-column">
-      {{range .MicroserviceList}}
-        <li class="nav-item">
-          <button data-target="{{.Endpoint}}" class="btn {{if .Selected}}btn-primary {{else}} btn-outline-primary{{end}} mb-2">{{.Name}}</button>
-        </li>
-      {{end}}
-    </ul>
+
+  <!-- ===== SIDEBAR ===== -->
+  <div class="sidebar">
+    <div class="sidebar-content">
+      <div class="sidebar-title">Select Service</div>
+      <div class="service-buttons">
+        <ul class="nav flex-column">
+          {{range .MicroserviceList}}
+            <li class="nav-item">
+              <button data-target="{{.Endpoint}}" class="btn {{if .Selected}}btn-primary {{else}} btn-outline-primary{{end}} mb-2">{{.Name}}</button>
+            </li>
+          {{end}}
+        </ul>
+      </div>
+    </div>
   </div>
+
+  <!-- ===== MAIN CONTENT ===== -->
   <div class="content">
     <div id="mainContent">
       <div class="sidebar-title">{{ .Message }}</div>
@@ -88,7 +151,8 @@
     </div>
   </div>
 
-    <!-- Modal structures -->
+  <!-- ===== MODALS ===== -->
+  <!-- Configuration Modal -->
   <div class="modal fade" id="modal1" tabindex="-1" aria-labelledby="modal1Label" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -108,6 +172,7 @@
     </div>
   </div>
 
+  <!-- About Modal -->
   <div class="modal fade" id="modal2" tabindex="-1" aria-labelledby="modal2Label" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -131,7 +196,9 @@
     </div>
   </div>
 
+  <!-- ===== JAVASCRIPT ===== -->
   <script>
+    // Service selection functionality
     document.querySelectorAll('button[data-target]').forEach(button => {
       button.addEventListener('click', function () {
         const target = button.getAttribute('data-target');
@@ -139,6 +206,7 @@
       });
     });
 
+    // Swagger UI initialization
     window.onload = function() {
       if ({{ .DisplaySwaggerUI }}) {
         const ui = SwaggerUIBundle({
@@ -155,5 +223,14 @@
       }
     }
   </script>
+
+  <!-- ===== EXTERNAL SCRIPTS ===== -->
+  <!-- Swagger UI Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.26.2/swagger-ui-bundle.min.js" integrity="sha512-5wwTumuGSEhs2cxv8qTPioOYR5ApZvDzEi8iEJ7ENTOzQ9/qLYh9tWKkMFlrYLpEcnHK+TkqvOLJxKSDGOWrfQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.26.2/swagger-ui-standalone-preset.min.js" integrity="sha512-yJlD9FXQ7YaxAKXhviHSt/0KqWDCkLFdCnk0Ti23HXDMEQtHLAAWMHZ+POglC1mx/MOUB//h8kci3U1JYrywpQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- Bootstrap Dependencies -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js" integrity="sha512-TPh2Oxlg1zp+kz3nFA0C5vVC6leG/6mm1z9+mA81MI5eaUVqasPLO8Cuk4gMF4gUfP5etR73rgU/8PNMsSesoQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.min.js" integrity="sha512-ykZ1QQr0Jy/4ZkvKuqWn4iF3lqPZyij9iRv6sGqLRdTPkY69YX6+7wvVGmsdBbiIfN/8OdsI7HABjvEok6ZopQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </body>
 </html>
